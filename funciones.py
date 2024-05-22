@@ -1,7 +1,7 @@
 """Funciones para app streamlit demo herramienta asignación de recursos según demanda."""
 
 import streamlit as st 
-import streamlit_folium as st_folium 
+from streamlit_folium import st_folium
 import numpy as np
 import pandas as pd 
 import folium
@@ -14,7 +14,7 @@ def asignar_recursos(df_necesidades, df_recursos):
     for index, row in df_necesidades.iterrows():
         cuadrante = row['Cuadrante']
         necesidad = row['Necesidad']
-        print(f"\nAsignando recursos para Cuadrante {cuadrante} con necesidad {necesidad}")
+        #print(f"\nAsignando recursos para Cuadrante {cuadrante} con necesidad {necesidad}")
         
         # Encontrar recursos disponibles
         recursos_disponibles = df_recursos[df_recursos['Asignacion'] == 0]
@@ -28,7 +28,7 @@ def asignar_recursos(df_necesidades, df_recursos):
             # Asignar el recurso al cuadrante
             df_recursos.at[recurso_index, 'Asignacion'] = cuadrante
             necesidad -= oferta_unitaria
-            print(f"Asignado recurso {recurso_index} con oferta unitaria {oferta_unitaria}")
+            #print(f"Asignado recurso {recurso_index} con oferta unitaria {oferta_unitaria}")
             
             # Actualizar 'Oferta_total' en el DataFrame de necesidades
             df_necesidades.at[index, 'Oferta_total'] += oferta_unitaria

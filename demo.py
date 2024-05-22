@@ -2,7 +2,7 @@
 
 import streamlit as st 
 import folium
-import streamlit_folium as st_folium 
+from streamlit_folium import st_folium
 import numpy as np
 import pandas as pd 
 import geopandas as gpd
