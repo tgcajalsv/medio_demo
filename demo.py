@@ -11,6 +11,8 @@ import funciones as f
 import random
 from shapely.geometry import Point, Polygon
 
+st.set_page_config(page_title="Demo", page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
+
 #-------------------- DATA INICIAL ---------------------
 # Definir el DataFrame 1: Cuadrantes y Necesidades
 data1 = {
@@ -43,9 +45,8 @@ df2["name"] = df2["Id"].astype(str).str.cat(df2["Medio"], sep='-')
 medios = list(df2["name"])
 seleccion = st.multiselect("Escoger medios disponibles:", medios)
 
-df2_filtrado = df2[df2["name"].isin(seleccion)]
-
-df2_asignado, df1_actualizado = f.asignar_recursos(df1, df2_filtrado)
+#df2_filtrado = df2[df2["name"].isin(seleccion)]
+#df2_asignado, df1_actualizado = f.asignar_recursos(df1, df2_filtrado)
 
 if st.button("Calcular",type="primary") == False:
 
@@ -57,7 +58,7 @@ if st.button("Calcular",type="primary") == False:
     # Mapa base
     m1 = folium.Map(
         location=[center_lat, center_lon],
-        zoom_start=13,
+        zoom_start=14,
     )
 
     # Agregar capa cuadrantes
@@ -72,7 +73,7 @@ if st.button("Calcular",type="primary") == False:
     map_html1 = m1._repr_html_()
 
     # Display the map in Streamlit
-    components.html(map_html1, width=1000, height=750)
+    components.html(map_html1, width=1200, height=750)
 
     col1, col2 = st.columns([2,1])
 
@@ -88,6 +89,9 @@ else:
     #-------------------- RESULTADOS ---------------------
     col1, col2 = st.columns([2,1])
 
+    df2_filtrado = df2[df2["name"].isin(seleccion)]
+    df2_asignado, df1_actualizado = f.asignar_recursos(df1, df2_filtrado)
+
     # Definir coordenadas centrales
     center_lat = gdf.geometry.centroid.y.mean()
     center_lon = gdf.geometry.centroid.x.mean()
@@ -95,7 +99,7 @@ else:
     # Mapa base
     m = folium.Map(
         location=[center_lat, center_lon],
-        zoom_start=13,
+        zoom_start=14,
     )
 
     # Agregar capa cuadrantes
@@ -114,7 +118,7 @@ else:
     map_html = m._repr_html_()
 
     # Display the map in Streamlit
-    components.html(map_html, width=1000, height=750)
+    components.html(map_html, width=1200, height=750)
 
     with col1:
         st.write("Medios asignados:")
