@@ -3,7 +3,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import folium
-from streamlit_folium import st_folium
+#from streamlit_folium import st_folium
 import numpy as np
 import pandas as pd 
 import geopandas as gpd
