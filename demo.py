@@ -1,6 +1,7 @@
 """Demo streamlit app herramienta asignación de recursos según demanda."""
 
 import streamlit as st 
+import folium
 import streamlit_folium as st_folium 
 import numpy as np
 import pandas as pd 
@@ -46,6 +47,28 @@ df2_filtrado = df2[df2["name"].isin(seleccion)]
 df2_asignado, df1_actualizado = f.asignar_recursos(df1, df2_filtrado)
 #-------------------- RESULTADOS ---------------------
 col1, col2 = st.columns([2,1])
+
+# Definir coordenadas centrales
+center_lat = gdf.geometry.centroid.y.mean()
+center_lon = gdf.geometry.centroid.x.mean()
+
+# Mapa base
+m = folium.Map(
+    location=[center_lat, center_lon],
+    zoom_start=14,
+)
+
+# Agregar capa cuadrantes
+for x in range(0,len(gdf)):
+    f.transform_polygon(gdf["geometry"].iloc[x],gdf["CUADRANTE_"].iloc[x]).add_to(m)
+
+# Agregar diferencia
+for x in list(gdf["CUADRANTE_"].unique()):
+    f.label_diferencia(x,df1_actualizado,gdf).add_to(m)
+
+medios_asignados = df2_asignado[df2_asignado["Asignacion"]!=0]
+for x in list(medios_asignados["Id"]):
+    f.viz_medios(df2_asignado,x,gdf).add_to(m)
 
 mapa = f.mapa_medios(gdf,df2_asignado,df1_actualizado)
 
