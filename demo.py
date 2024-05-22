@@ -71,7 +71,7 @@ for x in list(medios_asignados["Id"]):
     f.viz_medios(df2_asignado,x,gdf).add_to(m)
 
 with col1:
-    st_folium(m)
+    st_data = st_folium(m)
 
 with col2:
     st.dataframe(df2_asignado)
