@@ -47,7 +47,7 @@ df2_filtrado = df2[df2["name"].isin(seleccion)]
 
 df2_asignado, df1_actualizado = f.asignar_recursos(df1, df2_filtrado)
 #-------------------- RESULTADOS ---------------------
-col1, col2 = st.columns([2,1])
+#col1, col2 = st.columns([2,1])
 
 # Definir coordenadas centrales
 center_lat = gdf.geometry.centroid.y.mean()
@@ -71,14 +71,13 @@ medios_asignados = df2_asignado[df2_asignado["Asignacion"]!=0]
 for x in list(medios_asignados["Id"]):
     f.viz_medios(df2_asignado,x,gdf).add_to(m)
 
-with col1:
-    # Render the map in HTML
-    map_html = m._repr_html_()
+#with col1:
+# Render the map in HTML
+map_html = m._repr_html_()
 
-    # Display the map in Streamlit
-    st.title("Folium Map in Streamlit")
-    components.html(map_html)
+# Display the map in Streamlit
+components.html(map_html, width=1000, height=750)
 
-with col2:
-    st.dataframe(df2_asignado)
-    st.dataframe(df1_actualizado)
+#with col2:
+st.dataframe(df2_asignado)
+st.dataframe(df1_actualizado)
