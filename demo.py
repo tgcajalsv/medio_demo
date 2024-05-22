@@ -75,19 +75,14 @@ if st.button("Calcular",type="primary") == False:
     # Display the map in Streamlit
     components.html(map_html1, width=1200, height=750)
 
-    col1, col2 = st.columns([2,1])
+    st.write("Medios asignados:")
+    st.dataframe(df2[["Id","Medio","Oferta Unitaria","Asignacion"]],hide_index=True)
 
-    with col1:
-        st.write("Medios asignados:")
-        st.dataframe(df2[["Id","Medio","Oferta Unitaria","Asignacion"]],hide_index=True)
-
-    with col2: 
-        st.write("Demanda y oferta actualizadas:")
-        st.dataframe(df1, hide_index=True)
+    st.write("Demanda y oferta actualizadas:")
+    st.dataframe(df1, hide_index=True)
 
 else:
     #-------------------- RESULTADOS ---------------------
-    col1, col2 = st.columns([2,1])
 
     df2_filtrado = df2[df2["name"].isin(seleccion)]
     df2_asignado, df1_actualizado = f.asignar_recursos(df1, df2_filtrado)
@@ -120,10 +115,10 @@ else:
     # Display the map in Streamlit
     components.html(map_html, width=1200, height=750)
 
-    with col1:
-        st.write("Medios asignados:")
-        st.dataframe(df2_asignado[["Id","Medio","Oferta Unitaria","Asignacion"]],hide_index=True)
 
-    with col2: 
-        st.write("Demanda y oferta actualizadas:")
-        st.dataframe(df1_actualizado, hide_index=True)
+    st.header("Medios asignados:")
+    st.dataframe(df2_asignado[["Id","Medio","Oferta Unitaria","Asignacion"]],hide_index=True)
+
+
+    st.header("Demanda y oferta actualizadas:")
+    st.dataframe(df1_actualizado, hide_index=True)
