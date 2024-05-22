@@ -16,7 +16,7 @@ from shapely.geometry import Point, Polygon
 data1 = {
     'Cuadrante': ["SSC-12.01", "SSC-12.02", "SSC-12.03", "SSC-12.04", "SSC-12.05", "SSC-12.06", "SSC-12.07"],
     'Cuarteles': [0.88, 0.88, 0, 0, 0, 0.6, 0],
-    'Necesidad': [0.97, 0.77, 0.75, 1.68, 0.7, 0.82, 0.83],
+    'Necesidad': [1.09, 0.88, 0.83, 1.71, 0.76, 0.91, 0.85],
     'Oferta_total': [0,0,0,0,0,0,0],
     'Diferencia' : [0,0,0,0,0,0,0]
 }
@@ -46,38 +46,80 @@ seleccion = st.multiselect("Escoger medios disponibles:", medios)
 df2_filtrado = df2[df2["name"].isin(seleccion)]
 
 df2_asignado, df1_actualizado = f.asignar_recursos(df1, df2_filtrado)
-#-------------------- RESULTADOS ---------------------
-#col1, col2 = st.columns([2,1])
 
-# Definir coordenadas centrales
-center_lat = gdf.geometry.centroid.y.mean()
-center_lon = gdf.geometry.centroid.x.mean()
+if st.button("Calcular",type="primary") == False:
 
-# Mapa base
-m = folium.Map(
-    location=[center_lat, center_lon],
-    zoom_start=14,
-)
+    #------------------ESTADO INICIAL----------------------
+    # Definir coordenadas centrales
+    center_lat = gdf.geometry.centroid.y.mean()
+    center_lon = gdf.geometry.centroid.x.mean()
 
-# Agregar capa cuadrantes
-for x in range(0,len(gdf)):
-    f.transform_polygon(gdf["geometry"].iloc[x],gdf["CUADRANTE_"].iloc[x]).add_to(m)
+    # Mapa base
+    m1 = folium.Map(
+        location=[center_lat, center_lon],
+        zoom_start=13,
+    )
 
-# Agregar diferencia
-for x in list(gdf["CUADRANTE_"].unique()):
-    f.label_diferencia(x,df1_actualizado,gdf).add_to(m)
+    # Agregar capa cuadrantes
+    for x in range(0,len(gdf)):
+        f.transform_polygon(gdf["geometry"].iloc[x],gdf["CUADRANTE_"].iloc[x]).add_to(m1)
 
-medios_asignados = df2_asignado[df2_asignado["Asignacion"]!=0]
-for x in list(medios_asignados["Id"]):
-    f.viz_medios(df2_asignado,x,gdf).add_to(m)
+    # Agregar diferencia
+    for x in list(gdf["CUADRANTE_"].unique()):
+        f.label_diferencia(x,df1,gdf).add_to(m1)
 
-#with col1:
-# Render the map in HTML
-map_html = m._repr_html_()
+    # Render the map in HTML
+    map_html1 = m1._repr_html_()
 
-# Display the map in Streamlit
-components.html(map_html, width=1000, height=750)
+    # Display the map in Streamlit
+    components.html(map_html1, width=1000, height=750)
 
-#with col2:
-st.dataframe(df2_asignado)
-st.dataframe(df1_actualizado)
+    col1, col2 = st.columns([2,1])
+
+    with col1:
+        st.write("Medios asignados:")
+        st.dataframe(df2[["Id","Medio","Oferta Unitaria","Asignacion"]],hide_index=True)
+
+    with col2: 
+        st.write("Demanda y oferta actualizadas:")
+        st.dataframe(df1, hide_index=True)
+
+else:
+    #-------------------- RESULTADOS ---------------------
+    col1, col2 = st.columns([2,1])
+
+    # Definir coordenadas centrales
+    center_lat = gdf.geometry.centroid.y.mean()
+    center_lon = gdf.geometry.centroid.x.mean()
+
+    # Mapa base
+    m = folium.Map(
+        location=[center_lat, center_lon],
+        zoom_start=13,
+    )
+
+    # Agregar capa cuadrantes
+    for x in range(0,len(gdf)):
+        f.transform_polygon(gdf["geometry"].iloc[x],gdf["CUADRANTE_"].iloc[x]).add_to(m)
+
+    # Agregar diferencia
+    for x in list(gdf["CUADRANTE_"].unique()):
+        f.label_diferencia(x,df1_actualizado,gdf).add_to(m)
+
+    medios_asignados = df2_asignado[df2_asignado["Asignacion"]!=0]
+    for x in list(medios_asignados["Id"]):
+        f.viz_medios(df2_asignado,x,gdf).add_to(m)
+
+    # Render the map in HTML
+    map_html = m._repr_html_()
+
+    # Display the map in Streamlit
+    components.html(map_html, width=1000, height=750)
+
+    with col1:
+        st.write("Medios asignados:")
+        st.dataframe(df2_asignado[["Id","Medio","Oferta Unitaria","Asignacion"]],hide_index=True)
+
+    with col2: 
+        st.write("Demanda y oferta actualizadas:")
+        st.dataframe(df1_actualizado, hide_index=True)

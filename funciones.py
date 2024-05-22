@@ -1,7 +1,7 @@
 """Funciones para app streamlit demo herramienta asignación de recursos según demanda."""
 
 import streamlit as st 
-#from streamlit_folium import st_folium
+from streamlit_folium import st_folium
 import numpy as np
 import pandas as pd 
 import folium
@@ -120,10 +120,15 @@ def label_diferencia(cuadrante, df, gdf):
     # Definir diferencia
     diferencia = df[df["Cuadrante"]==cuadrante]["Diferencia"].values[0]
 
+    if diferencia>0:
+        color="green"
+    elif diferencia<0:
+        color="red"
+
     # Crear etiqueta
     div_icon = folium.DivIcon(html="""
-    <div style="font-family: sans-serif; color: black; background-color: white; padding: 2px 10px; border-radius: 3px; width: 100px; text-align: center;">
-        <b>"""+str(diferencia)+"""</b>
+    <div style="font-family: sans-serif; color: white; background-color:"""+str(color)+"""; padding: 2px 10px; border-radius: 3px; width: 50px; text-align: center;">
+        <b>"""+str(round(diferencia,2))+"""</b>
     </div>
     """)
 
@@ -133,7 +138,7 @@ def label_diferencia(cuadrante, df, gdf):
         icon=div_icon
     ) 
 
-    return label 
+    return label  
 
 # Función para generar puntos al azar dentro de un polígono
 def random_point(polygon: Polygon, std_dev_factor=0.2):
