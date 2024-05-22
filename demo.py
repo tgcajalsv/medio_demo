@@ -1,6 +1,7 @@
 """Demo streamlit app herramienta asignación de recursos según demanda."""
 
-import streamlit as st 
+import streamlit as st
+import streamlit.components.v1 as components
 import folium
 from streamlit_folium import st_folium
 import numpy as np
@@ -71,7 +72,12 @@ for x in list(medios_asignados["Id"]):
     f.viz_medios(df2_asignado,x,gdf).add_to(m)
 
 with col1:
-    st_data = st_folium(m)
+    # Render the map in HTML
+    map_html = m._repr_html_()
+
+    # Display the map in Streamlit
+    st.title("Folium Map in Streamlit")
+    components.html(map_html)
 
 with col2:
     st.dataframe(df2_asignado)
