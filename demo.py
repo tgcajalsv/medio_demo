@@ -47,8 +47,10 @@ df2_asignado, df1_actualizado = f.asignar_recursos(df1, df2_filtrado)
 #-------------------- RESULTADOS ---------------------
 col1, col2 = st.columns([2,1])
 
+mapa = f.mapa_medios(gdf,df2_asignado,df1_actualizado)
+
 with col1:
-    st_data = st_folium(f.mapa_medios(gdf,df2_asignado,df1_actualizado))
+    st_data = st_folium(mapa)
 
 with col2:
     st.dataframe(df2_asignado)
