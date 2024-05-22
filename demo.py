@@ -70,10 +70,8 @@ medios_asignados = df2_asignado[df2_asignado["Asignacion"]!=0]
 for x in list(medios_asignados["Id"]):
     f.viz_medios(df2_asignado,x,gdf).add_to(m)
 
-mapa = f.mapa_medios(gdf,df2_asignado,df1_actualizado)
-
 with col1:
-    st_data = st_folium(mapa)
+    st_data = st_folium(m)
 
 with col2:
     st.dataframe(df2_asignado)
