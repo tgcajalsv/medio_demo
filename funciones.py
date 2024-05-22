@@ -120,7 +120,7 @@ def label_diferencia(cuadrante, df, gdf):
     # Definir diferencia
     diferencia = df[df["Cuadrante"]==cuadrante]["Diferencia"].values[0]
 
-    if diferencia>0:
+    if diferencia>=0:
         color="green"
     elif diferencia<0:
         color="red"
