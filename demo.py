@@ -36,6 +36,38 @@ df2 = pd.DataFrame(data2)
 # Importar polígonos de cuadrantes
 gdf = gpd.read_file("poniente.geojson")
 
+predefined_coords = {
+    "SSC-12.01": [
+        (13.711347, -89.245041), (13.706200, -89.243542), (13.709451, -89.238279),
+        (13.704066, -89.229599), (13.704913, -89.238732)
+    ],
+    "SSC-12.02": [
+        (13.699606, -89.244572), (13.696846, -89.242720), (13.698806, -89.234116),
+        (13.689046, -89.240456), (13.685677, -89.242013)
+    ],
+    "SSC-12.03": [
+        (13.685677, -89.242013), (13.697569, -89.219173), (13.685726, -89.232846),
+        (13.687617, -89.225779), (13.687219, -89.220658)
+    ],
+    "SSC-12.04": [
+        (13.725679, -89.234178), (13.723589, -89.230900), (13.716674, -89.242525),
+        (13.715828, -89.237916), (13.714186, -89.233000)
+    ],
+    "SSC-12.05": [
+        (13.714917, -89.228318), (13.712130, -89.221146), (13.710296, -89.226053),
+        (13.724232, -89.226808), (13.721665, -89.219862)
+    ],
+    "SSC-12.06": [
+        (13.719245, -89.212841), (13.720272, -89.207782), (13.711397, -89.216087),
+        (13.706115, -89.219485), (13.708023, -89.215181)
+    ],
+    "SSC-12.07": [
+        (13.724232, -89.248930), (13.720345, -89.254064), (13.714184, -89.251422),
+        (13.718291, -89.251271), (13.708169, -89.251195)
+    ]
+    # Ensure each polygon has enough predefined points
+}
+
 #-------------------- ELEMENTOS VISUALES ---------------------
 st.title("Asignación de recursos")
 
@@ -105,9 +137,12 @@ else:
     for x in list(gdf["CUADRANTE_"].unique()):
         f.label_diferencia(x,df1_actualizado,gdf).add_to(m)
 
-    medios_asignados = df2_asignado[df2_asignado["Asignacion"]!=0]
+    medios_asignados = df2_asignado[df2_asignado["Asignacion"] != 0]
+    polygon_counter = {key: 0 for key in predefined_coords.keys()}
     for x in list(medios_asignados["Id"]):
-        f.viz_medios(df2_asignado,x,gdf).add_to(m)
+        marker = f.viz_medios(df2_asignado, x, predefined_coords, polygon_counter)
+        if marker:
+            marker.add_to(m)
 
     # Render the map in HTML
     map_html = m._repr_html_()
