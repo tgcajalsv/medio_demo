@@ -77,14 +77,21 @@ df2["name"] = df2["Id"].astype(str).str.cat(df2["Medio"], sep='-')
 # Lista de medios
 medios = list(df2["name"])
 
-# Objeto para agregar medios
-agregar_tipo = st.selectbox("Tipo de medio:",["RPT","MTT","INF"])
-agregar_asignar = st.selectbox("¿Asignar a cuadrante?",["No asignar","SSC-12.01","SSC-12.02","SSC-12.03","SSC-12.04","SSC-12.05","SSC-12.05","SSC-12.06","SSC-12.07"])
+col1, col2 = st.columns(2)
 
-if st.button("Agregar medio") == False:
-    df2 = df2
-else:
-    df2 = f.agregar_medio(df_medios=df2,tipo=agregar_tipo,asignacion=agregar_asignar)
+with col1:
+    # Objeto para agregar medios
+    agregar_tipo = st.selectbox("Tipo de medio:",["RPT","MTT","INF"])
+    agregar_asignar = st.selectbox("¿Asignar a cuadrante?",["No asignar","SSC-12.01","SSC-12.02","SSC-12.03","SSC-12.04","SSC-12.05","SSC-12.05","SSC-12.06","SSC-12.07"])
+
+    if st.button("Agregar medio") == False:
+        df2 = df2
+    else:
+        df2 = f.agregar_medio(df_medios=df2,tipo=agregar_tipo,asignacion=agregar_asignar)
+    
+with col2:
+    st.write("Medios disponibles")
+    st.dataframe(df2)
 
 # Objeto de selección
 seleccion = st.multiselect("Escoger medios disponibles:", medios)
