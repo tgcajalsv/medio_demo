@@ -253,6 +253,7 @@ def mapa_medios(gdf,df_asignados, df_cuadrantes):
 
     return m
 
+# Función para agregar medios
 def agregar_medio(df_medios, tipo, id_=False, asignacion=0):
     """Función para agregar nuevos medios.
     Parámetros:
@@ -262,6 +263,11 @@ def agregar_medio(df_medios, tipo, id_=False, asignacion=0):
     - asignacion: cuadrante al que el medio está asignado (default=0)
     Output: 
     Actualiza el DataFrame de medios según las especificaciones del usuario."""
+
+    if asignacion == "No asignar":
+        asignacion = 0
+    else: 
+        asignacion = asignacion
 
     if id_ == True:
         id_ = id_
@@ -285,3 +291,4 @@ def agregar_medio(df_medios, tipo, id_=False, asignacion=0):
     df_medios = pd.concat([row, df_medios.loc[:]]).reset_index(drop=True)
 
     return df_medios
+
