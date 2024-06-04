@@ -70,33 +70,31 @@ def asignar_recursos(df_necesidades, df_recursos):
 # Función para transformar polígonos
 def transform_polygon(shapely_polygon, name):
     """
-    Convert a Shapely polygon to a Folium polygon.
+    Función para convertir polígono shapely en polígono folium.
 
-    Parameters:
-    - shapely_polygon: A Shapely polygon object.
-    - color: Color of the polygon outline (default: 'blue').
-    - weight: Weight of the polygon outline (default: 2).
-    - fill_color: Fill color of the polygon (default: 'blue').
-    - fill_opacity: Opacity of the fill color (default: 0.4).
+    Parámetros:
+    - shapely_polygon: Polígono shapely.
+    - color: Color de línea (default: 'blue').
+    - weight: Grosor de línea (default: 2).
+    - fill_color: Color de relleno de polígono (default: 'blue').
+    - fill_opacity: Opacidad de color de relleno (default: 0.4).
 
-    Returns:
-    - A Folium polygon object.
+    Output:
+    - Objeto polígono folium.
     """
-    # Extract coordinates from the Shapely polygon
+    # Extraer coordenadas
     coordinates = shapely_polygon.exterior.coords.xy
 
-    # Create a list of latitudes and longitudes
+    # Generar puntos 
     latitudes = list(coordinates[1])
     longitudes = list(coordinates[0])
-
-    # Create a list of (latitude, longitude) pairs
     points = list(zip(latitudes, longitudes))
 
     # Definir color
     color="deepskyblue"
     fill_color="deepskyblue"
 
-    # Create a Folium polygon
+    # Crear polígono folium
     folium_polygon = folium.vector_layers.Polygon(
         locations=points,
         color=color,
@@ -120,6 +118,7 @@ def label_diferencia(cuadrante, df, gdf):
     # Definir diferencia
     diferencia = df[df["Cuadrante"]==cuadrante]["Diferencia"].values[0]
 
+    # Definir color según diferencia
     if diferencia>=0:
         color="green"
     elif diferencia<0:
@@ -140,23 +139,7 @@ def label_diferencia(cuadrante, df, gdf):
 
     return label  
 
-# Función para generar puntos al azar dentro de un polígono
-def random_point(polygon: Polygon, std_dev_factor=0.2):
-    centroid = polygon.centroid
-    centroid_x, centroid_y = centroid.x, centroid.y
-    min_x, min_y, max_x, max_y = polygon.bounds
-    
-    # Calculate standard deviation based on the polygon size and the factor provided
-    std_dev_x = (max_x - min_x) * std_dev_factor
-    std_dev_y = (max_y - min_y) * std_dev_factor
-    
-    while True:
-        random_x = np.random.normal(centroid_x, std_dev_x)
-        random_y = np.random.normal(centroid_y, std_dev_y)
-        random_point = Point(random_x, random_y)
-        if polygon.contains(random_point):
-            return [random_point.y, random_point.x]
-        
+# Coordenadas predefinidas para marcadores de medios en cuadrantes        
 predefined_coords = {
     "SSC-12.01": [
         (13.711347, -89.245041), (13.706200, -89.243542), (13.709451, -89.238279),
@@ -186,15 +169,16 @@ predefined_coords = {
         (13.724232, -89.248930), (13.720345, -89.254064), (13.714184, -89.251422),
         (13.718291, -89.251271), (13.708169, -89.251195)
     ]
-    # Ensure each polygon has enough predefined points
 }
 
+
 def get_predefined_point(polygon_id, index):
+    # Coordenadas pre definidas en polígonos
     coords = predefined_coords.get(polygon_id, [])
     if index < len(coords):
         return coords[index]
     else:
-        return None  # Handle the case where there are not enough predefined points
+        return None  # En caso de no haber suficientes puntos
         
 # Función para agregar medios asignados
 def viz_medios(df, id_medio, predefined_coords, polygon_counter):
@@ -211,8 +195,8 @@ def viz_medios(df, id_medio, predefined_coords, polygon_counter):
         icon = "person"
         color = "cadetblue"
     
-    # Use the predefined coordinates based on the polygon counter
-    polygon_id = cuadrante  # Assume 'cuadrante' is used as the polygon ID
+    # Agregar un contador de cantidad de marcadores por cuadrante
+    polygon_id = cuadrante  
     coord = get_predefined_point(polygon_id, polygon_counter[polygon_id])
     if coord:
         polygon_counter[polygon_id] += 1
@@ -222,7 +206,7 @@ def viz_medios(df, id_medio, predefined_coords, polygon_counter):
         )
         return marcador
     else:
-        return None  # Handle the case where no valid coordinate is found
+        return None  # En caso de coordenadas no válidas
 
 # Función para generar mapa
 def mapa_medios(gdf,df_asignados, df_cuadrantes):
@@ -244,6 +228,7 @@ def mapa_medios(gdf,df_asignados, df_cuadrantes):
     for x in list(gdf["CUADRANTE_"].unique()):
         label_diferencia(x,df_cuadrantes,gdf).add_to(m)
 
+    # Agregar marcadores de medios asignados según coordenadas predefinidas
     medios_asignados = df_asignados[df_asignados["Asignacion"] != 0]
     polygon_counter = {key: 0 for key in predefined_coords.keys()}
     for x in list(medios_asignados["Id"]):
@@ -286,9 +271,9 @@ def agregar_medio(df_medios, tipo, id_=False, asignacion=0):
     row = pd.DataFrame({"Id":id_,
            "Medio":tipo,
            "Oferta Unitaria":oferta,
-           "Asignacion":asignacion}, index=[0])
+           "Asignacion":asignacion,
+           "name":str(id_)+str(tipo)}, index=[0])
 
     df_medios = pd.concat([row, df_medios.loc[:]]).reset_index(drop=True)
 
     return df_medios
-

@@ -11,6 +11,7 @@ import funciones as f
 import random
 from shapely.geometry import Point, Polygon
 
+# Configuración de página
 st.set_page_config(page_title="Demo", page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
 
 #-------------------- DATA INICIAL ---------------------
@@ -36,6 +37,7 @@ df2 = pd.DataFrame(data2)
 # Importar polígonos de cuadrantes
 gdf = gpd.read_file("poniente.geojson")
 
+# Coordenadas predeterminadas para asignación de marcadores en polígonos
 predefined_coords = {
     "SSC-12.01": [
         (13.711347, -89.245041), (13.706200, -89.243542), (13.709451, -89.238279),
@@ -65,43 +67,53 @@ predefined_coords = {
         (13.724232, -89.248930), (13.720345, -89.254064), (13.714184, -89.251422),
         (13.718291, -89.251271), (13.708169, -89.251195)
     ]
-    # Ensure each polygon has enough predefined points
 }
 
 #-------------------- ELEMENTOS VISUALES ---------------------
 st.title("Asignación de recursos")
 
 #-------------------- USER INPUT ---------------------
+
+# Creación de columna "name" para relacionar con nombres de cuadrantes
 df2["name"] = df2["Id"].astype(str).str.cat(df2["Medio"], sep='-')
 
-# Lista de medios
-medios = list(df2["name"])
+if 'df2' not in st.session_state:
+    st.session_state.df = df2
 
 col1, col2 = st.columns(2)
 
 with col1:
+
+    st.write("Agregar medios:")
+
     # Objeto para agregar medios
     agregar_tipo = st.selectbox("Tipo de medio:",["RPT","MTT","INF"])
     agregar_asignar = st.selectbox("¿Asignar a cuadrante?",["No asignar","SSC-12.01","SSC-12.02","SSC-12.03","SSC-12.04","SSC-12.05","SSC-12.05","SSC-12.06","SSC-12.07"])
 
     if st.button("Agregar medio") == False:
-        df2 = df2
+        st.session_state.df = df2
     else:
-        df2 = f.agregar_medio(df_medios=df2,tipo=agregar_tipo,asignacion=agregar_asignar)
+        st.session_state.df = f.agregar_medio(df_medios=st.session_state.df,tipo=agregar_tipo,asignacion=agregar_asignar)
     
 with col2:
     st.write("Medios disponibles")
-    st.dataframe(df2)
+    st.write(st.session_state.df)
+
+# Lista de medios
+medios = list(st.session_state.df["name"])
 
 # Objeto de selección
 seleccion = st.multiselect("Escoger medios disponibles:", medios)
 
+# Botón para calcular
 if st.button("Calcular",type="primary") == False:
 
     #------------------ESTADO INICIAL----------------------
     # Definir coordenadas centrales
     center_lat = gdf.geometry.centroid.y.mean()
     center_lon = gdf.geometry.centroid.x.mean()
+
+# NOTA: creación de mapas con función a ser implementado a futuro
 
     # Mapa base
     m1 = folium.Map(
@@ -117,22 +129,25 @@ if st.button("Calcular",type="primary") == False:
     for x in list(gdf["CUADRANTE_"].unique()):
         f.label_diferencia(x,df1,gdf).add_to(m1)
 
-    # Render the map in HTML
+    # Convertir objeto de mapa a HTML
     map_html1 = m1._repr_html_()
 
-    # Display the map in Streamlit
+    # Mostrar mapa
     components.html(map_html1, width=1200, height=750)
 
+    # Mostrar DataFrame original de medios asignados
     st.write("Medios asignados:")
-    st.dataframe(df2[["Id","Medio","Oferta Unitaria","Asignacion"]],hide_index=True)
+    st.dataframe(st.session_state.df[["Id","Medio","Oferta Unitaria","Asignacion"]],hide_index=True)
 
+    # Mostrar DataFrame original de oferta y demanda
     st.write("Demanda y oferta actualizadas:")
     st.dataframe(df1, hide_index=True)
 
 else:
     #-------------------- RESULTADOS ---------------------
 
-    df2_filtrado = df2[df2["name"].isin(seleccion)]
+    # Actualizar función
+    df2_filtrado = st.session_state.df[st.session_state.df["name"].isin(seleccion)]
     df2_asignado, df1_actualizado = f.asignar_recursos(df1, df2_filtrado)
 
     # Definir coordenadas centrales
@@ -153,23 +168,24 @@ else:
     for x in list(gdf["CUADRANTE_"].unique()):
         f.label_diferencia(x,df1_actualizado,gdf).add_to(m)
 
-    medios_asignados = df2_asignado[df2_asignado["Asignacion"] != 0]
+    # Agregar marcadores de medios asignados
+    medios_asignados = df2_asignado[df2_asignado["Asignacion"] != 0] # Filtrar por medios que han sido asignados
     polygon_counter = {key: 0 for key in predefined_coords.keys()}
     for x in list(medios_asignados["Id"]):
         marker = f.viz_medios(df2_asignado, x, predefined_coords, polygon_counter)
         if marker:
             marker.add_to(m)
 
-    # Render the map in HTML
+    # Convertir mapa a HTML
     map_html = m._repr_html_()
 
-    # Display the map in Streamlit
+    # Mostrar mapa
     components.html(map_html, width=1200, height=750)
 
-
+    # Mostrar DataFrame de medios asignados actualizado
     st.header("Medios asignados:")
     st.dataframe(df2_asignado[["Id","Medio","Oferta Unitaria","Asignacion"]],hide_index=True)
 
-
+    # Mostrar DataFrame de demanda y oferta actualizado
     st.header("Demanda y oferta actualizadas:")
     st.dataframe(df1_actualizado, hide_index=True)
