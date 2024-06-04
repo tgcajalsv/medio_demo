@@ -252,3 +252,36 @@ def mapa_medios(gdf,df_asignados, df_cuadrantes):
             marker.add_to(m)
 
     return m
+
+def agregar_medio(df_medios, tipo, id_=False, asignacion=0):
+    """Función para agregar nuevos medios.
+    Parámetros:
+    - df_medios: DataFrame de medios disponibles
+    - tipo: RPT, MTT, o INF (str)
+    - id_: opción para agregar un número identificador al medio (default=False, se suma 1 al último id númerico del dataframe, cambiar de acuerdo a tipo de datos real de identificadores)
+    - asignacion: cuadrante al que el medio está asignado (default=0)
+    Output: 
+    Actualiza el DataFrame de medios según las especificaciones del usuario."""
+
+    if id_ == True:
+        id_ = id_
+    else:
+        id_ = max(df_medios["Id"])+1
+
+    if tipo == "RPT":
+        oferta = 1
+    elif tipo=="MTT":
+        oferta = 1.35
+    elif tipo=="INF":
+        oferta = 1.2
+    else:
+        oferta = 0
+
+    row = pd.DataFrame({"Id":id_,
+           "Medio":tipo,
+           "Oferta Unitaria":oferta,
+           "Asignacion":asignacion}, index=[0])
+
+    df_medios = pd.concat([row, df_medios.loc[:]]).reset_index(drop=True)
+
+    return df_medios
