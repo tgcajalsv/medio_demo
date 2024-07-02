@@ -11,6 +11,11 @@ import funciones as f
 import random
 from shapely.geometry import Point, Polygon
 
+
+# TODO Mapa muestra marcadores del csv
+# TODO Buscar el evento del marcador y SET las nuevas coordenadas en el csv
+# TODO Calcular el csv
+
 # Configuración de página
 st.set_page_config(page_title="Demo", page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
 
@@ -79,25 +84,6 @@ df2["name"] = df2["Id"].astype(str).str.cat(df2["Medio"], sep='-')
 
 if 'df2' not in st.session_state:
     st.session_state.df = df2
-
-col1, col2 = st.columns(2)
-
-with col1:
-
-    st.write("Agregar medios:")
-
-    # Objeto para agregar medios
-    agregar_tipo = st.selectbox("Tipo de medio:",["RPT","MTT","INF"])
-    agregar_asignar = st.selectbox("¿Asignar a cuadrante?",["No asignar","SSC-12.01","SSC-12.02","SSC-12.03","SSC-12.04","SSC-12.05","SSC-12.05","SSC-12.06","SSC-12.07"])
-
-    if st.button("Agregar medio") == False:
-        st.session_state.df = df2
-    else:
-        st.session_state.df = f.agregar_medio(df_medios=st.session_state.df,tipo=agregar_tipo,asignacion=agregar_asignar)
-    
-with col2:
-    st.write("Medios disponibles")
-    st.write(st.session_state.df)
 
 # Lista de medios
 medios = list(st.session_state.df["name"])

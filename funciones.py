@@ -202,6 +202,7 @@ def viz_medios(df, id_medio, predefined_coords, polygon_counter):
         polygon_counter[polygon_id] += 1
         marcador = folium.Marker(
             location=coord, 
+            draggable=True,
             icon=folium.Icon(icon=icon, color=color, prefix='fa')
         )
         return marcador
