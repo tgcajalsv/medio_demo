@@ -92,7 +92,7 @@ else:
 #                  SELECCIÓN DE CONJUNTOS DISPONIBLES
 #---------------------------------------------------------------
 # Creación de columna "name" para relacionar con nombres de cuadrantes
-medios["name"] = medios["Id"].astype(str).str.cat(medios["Medio"], sep='-')
+medios["name"] = medios["Id_Medio"].astype(str).str.cat(medios["Medio"], sep='-')
 
 # Lista de opciones de medios
 opciones_medios = list(medios["Medio"])
@@ -237,7 +237,7 @@ with st.container:
         polygon_counter = {key: 0 for key in predefined_coords.keys()}
         for x in list(medios_asignados["Id"]):
             id_conjunto = df2["Asignacion_Cuadrante_T1"][x]
-            marker = f.viz_medios(df2, x, predefined_coords, polygon_counter, id_conjunto)
+            marker = f.viz_medios(df2, x, predefined_coords, polygon_counter, id_conjunto, turno)
             if marker:
                 marker.add_to(mapa)
 
