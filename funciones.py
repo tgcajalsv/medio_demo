@@ -102,6 +102,7 @@ def transform_polygon(shapely_polygon, name):
 
 # Función para etiquetas de diferencia
 def label_diferencia(cuadrante, df, gdf):
+    df = df.rename(columns={"Id_Cuadrante":"Cuadrante"})
 
     # Definir polígono
     poligono = gdf[gdf["CUADRANTE_"]==cuadrante]["geometry"].values[0]
