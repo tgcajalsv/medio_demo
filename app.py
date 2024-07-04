@@ -215,6 +215,9 @@ turno = st.selectbox(label="Escoger turno",
 #---------------------------------------------------------------
 #                  CREACIÓN DE MAPA
 #---------------------------------------------------------------
+df1 = cuadrantes
+df2 = medios
+df3 = conjuntos
 
 # Agregar diferencia
 for x in list(capa["CUADRANTE_"].unique()):
