@@ -1,40 +1,45 @@
-"""Funciones para app streamlit demo herramienta asignación de recursos según demanda."""
-
-import streamlit as st 
-#from streamlit_folium import st_folium
+"""Funciones para demo de aplicativo de asignación de medios."""
 import numpy as np
-import pandas as pd 
-import folium
-import random
-from shapely.geometry import Point, Polygon
+import pandas as pd
+import geopandas as gpd 
+import matplotlib.pyplot as plt 
 
+import folium 
+import geopandas as gpd 
+import shapely
+from shapely import Polygon
+import streamlit as st
+
+# Función para asignar recursos a los cuadrantes y actualizar 'Oferta_total'-------------------------------------------------------------------
 # Función para asignar recursos a los cuadrantes y actualizar 'Oferta_total'
-def asignar_recursos(df_necesidades, df_recursos):
+def asignar_recursos(df_necesidades, df_recursos, asignacionC):
     # Iterar sobre cada cuadrante
     for index, row in df_necesidades.iterrows():
-        cuadrante = row['Cuadrante']
+        cuadrante = index
         necesidad = row['Necesidad']
-        #print(f"\nAsignando recursos para Cuadrante {cuadrante} con necesidad {necesidad}")
+        print(f"\nAsignando recursos para Cuadrante {cuadrante} con necesidad {necesidad}")
         
-        # Encontrar recursos disponibles
-        recursos_disponibles = df_recursos[df_recursos['Asignacion'] == 0]
+        # Filtrar recursos disponibles donde Medio es 'RPT'
+        recursos_disponibles = df_recursos[(df_recursos[asignacionC] == 0) & (df_recursos['Medio'] == 'RPT')]
+
         
         # Asignar recursos hasta cubrir la necesidad
         while necesidad > 0 and not recursos_disponibles.empty:
-            # Tomar el primer recurso disponible
-            recurso_index = recursos_disponibles.index[0]
+            # Tomar un recurso disponible aleatoriamente
+            recurso_index = recursos_disponibles.sample().index[0]
             oferta_unitaria = recursos_disponibles.loc[recurso_index, 'Oferta Unitaria']
             
             # Asignar el recurso al cuadrante
-            df_recursos.at[recurso_index, 'Asignacion'] = cuadrante
+            df_recursos.at[recurso_index, asignacionC] = cuadrante
             necesidad -= oferta_unitaria
-            #print(f"Asignado recurso {recurso_index} con oferta unitaria {oferta_unitaria}")
+            print(f"Asignado recurso {recurso_index} con oferta unitaria {oferta_unitaria}")
             
             # Actualizar 'Oferta_total' en el DataFrame de necesidades
-            df_necesidades.at[index, 'Oferta_total'] += oferta_unitaria
+            df_necesidades.at[index, 'Oferta_Total'] += oferta_unitaria
             
             # Actualizar recursos disponibles
-            recursos_disponibles = df_recursos[df_recursos['Asignacion'] == 0]
+            recursos_disponibles = df_recursos[(df_recursos[asignacionC] == 0) & (df_recursos['Medio'] == 'RPT')]
+
         
         if necesidad > 0:
             print(f"No se pudo cubrir la necesidad completa para Cuadrante {cuadrante}. Necesidad restante: {necesidad}")
@@ -42,30 +47,18 @@ def asignar_recursos(df_necesidades, df_recursos):
             print(f"Necesidad cubierta para Cuadrante {cuadrante}")
 
     
-    df_necesidades['Diferencia'] = df_necesidades['Oferta_total'] + df_necesidades['Cuarteles'] - df_necesidades['Necesidad']
-    recursos_disponibles = df_recursos[df_recursos['Asignacion'] == 0]
+    df_necesidades['Diferencia'] = df_necesidades['Oferta_Total'] + df_necesidades['Cuarteles'] - df_necesidades['Necesidad']
+    recursos_disponibles = df_recursos[df_recursos[asignacionC] == 0]
 
-    # Ordenar los cuadrantes según tengan la menor diferencia
-    if not recursos_disponibles.empty:
-    
-        df_necesidades = df_necesidades.sort_values(by='Diferencia')
-
-
-        # Iterar sobre los cuadrantes ordenados inversamente y asignar recursos remanentes
-        for index, row in df_necesidades.iterrows():
-            if not recursos_disponibles.empty:
-                cuadrante = row['Cuadrante']  # Obtener el cuadrante
-                oferta_unitaria = recursos_disponibles.iloc[0]['Oferta Unitaria']  # Obtener la oferta unitaria del primer recurso disponible
-                df_necesidades.at[index, 'Oferta_total'] += oferta_unitaria  # Actualizar oferta total en el DataFrame de necesidades
-                df_recursos.at[recursos_disponibles.index[0], 'Asignacion'] = cuadrante  # Asignar el cuadrante al primer recurso disponible
-                recursos_disponibles = recursos_disponibles.iloc[1:]  # Remover el recurso asignado
-            else:
-                break  # Si no hay recursos disponibles, salir del bucle
-            
-    df_necesidades['Diferencia'] = df_necesidades['Oferta_total'] + df_necesidades['Cuarteles'] - df_necesidades['Necesidad']
-    df_necesidades = df_necesidades.sort_values(by='Cuadrante')
+    df_necesidades['Diferencia'] = df_necesidades['Oferta_Total'] + df_necesidades['Cuarteles'] - df_necesidades['Necesidad']
+    df_necesidades = df_necesidades.sort_values(by='Id_Cuadrante')
             
     return df_recursos, df_necesidades
+#--///////---//----//----///----//-----//////---//-----///////----///----//------
+#--//--------//----//----////---//---//---------//---//------//---////---//------
+#--////------//----//----//-//--//--//----------//---//------//---//-//--//-------
+#--//--------//----//----//--//-//---//---------//----//----//----//--//-//------
+#--//--------///////-----//---////----//////----//-----/////------//---////----
 
 # Función para transformar polígonos
 def transform_polygon(shapely_polygon, name):
@@ -137,7 +130,8 @@ def label_diferencia(cuadrante, df, gdf):
         icon=div_icon
     ) 
 
-    return label  
+    return label 
+
 
 # Coordenadas predefinidas para marcadores de medios en cuadrantes        
 predefined_coords = {
@@ -179,102 +173,4 @@ def get_predefined_point(polygon_id, index):
         return coords[index]
     else:
         return None  # En caso de no haber suficientes puntos
-        
-# Función para agregar medios asignados
-def viz_medios(df, id_medio, predefined_coords, polygon_counter):
-    tipo = df[df["Id"] == id_medio]["Medio"].values[0]
-    cuadrante = df[df["Id"] == id_medio]["Asignacion"].values[0]
-
-    if tipo == "RPT":
-        icon = "car"
-        color = "darkblue"
-    elif tipo == "MTT":
-        icon = "motorcycle"
-        color = "blue"
-    elif tipo == "INF":
-        icon = "person"
-        color = "cadetblue"
     
-    # Agregar un contador de cantidad de marcadores por cuadrante
-    polygon_id = cuadrante  
-    coord = get_predefined_point(polygon_id, polygon_counter[polygon_id])
-    if coord:
-        polygon_counter[polygon_id] += 1
-        marcador = folium.Marker(
-            location=coord, 
-            draggable=True,
-            icon=folium.Icon(icon=icon, color=color, prefix='fa')
-        )
-        return marcador
-    else:
-        return None  # En caso de coordenadas no válidas
-
-# Función para generar mapa
-def mapa_medios(gdf,df_asignados, df_cuadrantes):
-    # Definir coordenadas centrales
-    center_lat = gdf.geometry.centroid.y.mean()
-    center_lon = gdf.geometry.centroid.x.mean()
-
-    # Mapa base
-    m = folium.Map(
-        location=[center_lat, center_lon],
-        zoom_start=14,
-    )
-
-    # Agregar capa cuadrantes
-    for x in range(0,len(gdf)):
-        transform_polygon(gdf["geometry"].iloc[x],gdf["CUADRANTE_"].iloc[x]).add_to(m)
-
-    # Agregar diferencia
-    for x in list(gdf["CUADRANTE_"].unique()):
-        label_diferencia(x,df_cuadrantes,gdf).add_to(m)
-
-    # Agregar marcadores de medios asignados según coordenadas predefinidas
-    medios_asignados = df_asignados[df_asignados["Asignacion"] != 0]
-    polygon_counter = {key: 0 for key in predefined_coords.keys()}
-    for x in list(medios_asignados["Id"]):
-        marker = viz_medios(df_asignados, x, predefined_coords, polygon_counter)
-        if marker:
-            marker.add_to(m)
-
-    return m
-
-# Función para agregar medios
-def agregar_medio(df_medios, tipo, id_=False, asignacion=0):
-    """Función para agregar nuevos medios.
-    Parámetros:
-    - df_medios: DataFrame de medios disponibles
-    - tipo: RPT, MTT, o INF (str)
-    - id_: opción para agregar un número identificador al medio (default=False, se suma 1 al último id númerico del dataframe, cambiar de acuerdo a tipo de datos real de identificadores)
-    - asignacion: cuadrante al que el medio está asignado (default=0)
-    Output: 
-    Actualiza el DataFrame de medios según las especificaciones del usuario."""
-
-    if asignacion == "No asignar":
-        asignacion = 0
-    else: 
-        asignacion = asignacion
-
-    if id_ == True:
-        id_ = id_
-    else:
-        id_ = max(df_medios["Id"])+1
-
-    if tipo == "RPT":
-        oferta = 1
-    elif tipo=="MTT":
-        oferta = 1.35
-    elif tipo=="INF":
-        oferta = 1.2
-    else:
-        oferta = 0
-
-    row = pd.DataFrame({"Id":id_,
-           "Medio":tipo,
-           "Oferta Unitaria":oferta,
-           "Asignacion":asignacion,
-           "name":str(id_)+str(tipo)}, index=[0])
-
-    df_medios = pd.concat([row, df_medios.loc[:]]).reset_index(drop=True)
-
-    return df_medios
