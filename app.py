@@ -225,16 +225,6 @@ else:
 #                  CREACIÓN DE MAPA
 #---------------------------------------------------------------
 
-    # Agregar diferencia
-    for x in list(capa["CUADRANTE_"].unique()):
-        f.label_diferencia(x,df1,capa).add_to(mapa)
-
-    # Convertir objeto de mapa a HTML
-    map_html0 = mapa._repr_html_()
-
-    # Mostrar mapa
-    components.html(map_html0, width=1200, height=750)
-
     if turno ==1:
         # Agregar diferencia
         for x in list(df1["Cuadrante"].unique()):
