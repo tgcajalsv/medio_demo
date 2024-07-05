@@ -51,7 +51,7 @@ def asignar_recursos(df_necesidades, df_recursos, asignacionC):
     recursos_disponibles = df_recursos[df_recursos[asignacionC] == 0]
 
     df_necesidades['Diferencia'] = df_necesidades['Oferta_Total'] + df_necesidades['Cuarteles'] - df_necesidades['Necesidad']
-    df_necesidades = df_necesidades.sort_values(by='Id_Cuadrante')
+    df_necesidades = df_necesidades.sort_values(by='Cuadrante')
             
     return df_recursos, df_necesidades
 #--///////---//----//----///----//-----//////---//-----///////----///----//------
