@@ -102,6 +102,7 @@ def transform_polygon(shapely_polygon, name):
 
 # Función para etiquetas de diferencia
 def label_diferencia(cuadrante, df, gdf):
+    #df = df.rename(columns={"Id_Cuadrante":"Cuadrante"})
 
     # Definir polígono
     poligono = gdf[gdf["CUADRANTE_"]==cuadrante]["geometry"].values[0]
@@ -130,7 +131,7 @@ def label_diferencia(cuadrante, df, gdf):
         icon=div_icon
     ) 
 
-    return label 
+    return label  
 
 
 # Coordenadas predefinidas para marcadores de medios en cuadrantes        
@@ -174,3 +175,55 @@ def get_predefined_point(polygon_id, index):
     else:
         return None  # En caso de no haber suficientes puntos
     
+def create_popup_content(id_conjunto, turno, conjuntos):
+    rows = conjuntos[(conjuntos['Id_Conjunto'] == int(id_conjunto))&(conjuntos["Turno"]==int(turno))]
+    if rows.empty:
+        return "No data available"
+    
+    conjunto = rows.iloc[0]['Id_Conjunto']
+    grupo = rows.iloc[0]['Grupo']
+    personal_data = ", ".join(f"{row['Rango']} ({row['Tipo']})" for idx, row in rows.iterrows())
+    popup_content = (f"Personal: {personal_data}<br>"
+                     f"Número de grupo: {grupo}<br>"
+                     f"Número de conjunto: {conjunto}")
+    return popup_content
+
+
+#conjuntos = pd.read_excel("conjuntos2.xlsx")
+
+# Función para agregar medios asignados
+def viz_medios(conjuntos, df, id_medio, predefined_coords, polygon_counter, id_conjunto, turno):
+    id_conjunto = int(id_conjunto)
+
+    tipo = df[df["Id_Medio"] == id_medio]["Medio"].values[0]
+    print("Tipo (str): "+str(tipo))
+    print("Id medio (int): "+str(id_medio))
+    print("Id conjunto (int): "+str(id_conjunto))
+    print("Turno: "+str(turno))
+    cuadrante = df[df["Id_Medio"] == id_medio]["Asignacion_Cuadrante_T"+str(turno)].values[0]
+    cuadrante_name = "SSC-12.0"+str(cuadrante)
+
+    if tipo == "RPT":
+        icon = "car"
+        color = "darkblue"
+    elif tipo == "MTT":
+        icon = "motorcycle"
+        color = "blue"
+    
+    # Agregar un contador de cantidad de marcadores por cuadrante
+    polygon_id = cuadrante
+    #print("polygon_id: "+str(polygon_id)+", type: "+str(type(polygon_id)))
+
+    coord = get_predefined_point(cuadrante_name, polygon_counter[cuadrante_name])
+    if coord:
+        polygon_counter[cuadrante_name] += 1
+        popup_content = create_popup_content(id_conjunto, turno, conjuntos)
+        marcador = folium.Marker(
+            location=coord, 
+            draggable=True,
+            popup=popup_content,
+            icon=folium.Icon(icon=icon, color=color, prefix='fa')
+        )
+        return marcador
+    else:
+        return None  # En caso de coordenadas no válidas

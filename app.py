@@ -231,15 +231,21 @@ components.html(map_html1, width=1200, height=750)
 
 if turno ==1:
     # Agregar diferencia
-    for x in list(capa["CUADRANTE_"].unique()):
+    for x in list(df1["Cuadrante"].unique()):
         f.label_diferencia(x,df1,capa).add_to(mapa)
 
     # Agregar marcadores de medios asignados
     medios_asignados = df2[df2["Asignacion_Cuadrante_T1"] != 0] # Filtrar por medios que han sido asignados
-    polygon_counter = {key: 0 for key in predefined_coords.keys()}
-    for x in list(medios_asignados["Id"]):
+    polygon_counter = {key: 0 for key in f.predefined_coords.keys()}
+    for x in list(medios_asignados["Id_Medio"]):
         id_conjunto = df2["Asignacion_Cuadrante_T1"][x]
-        marker = f.viz_medios(df2, x, predefined_coords, polygon_counter, id_conjunto, turno)
+        marker = f.viz_medios(conjuntos=conjuntos, 
+                              df = df2, 
+                              id_medio = x, 
+                              predefined_coords= f.predefined_coords, 
+                              polygon_counter= polygon_counter, 
+                              id_conjunto= id_conjunto, 
+                              turno = 1)
         if marker:
             marker.add_to(mapa)
 
@@ -251,15 +257,21 @@ if turno ==1:
 
 elif turno ==2:
     # Agregar diferencia
-    for x in list(capa["CUADRANTE_"].unique()):
+    for x in list(df1["Cuadrante"].unique()):
         f.label_diferencia(x,df1,capa).add_to(mapa)
 
     # Agregar marcadores de medios asignados
     medios_asignados = df2[df2["Asignacion_Cuadrante_T2"] != 0] # Filtrar por medios que han sido asignados
-    polygon_counter = {key: 0 for key in predefined_coords.keys()}
-    for x in list(medios_asignados["Id"]):
+    polygon_counter = {key: 0 for key in f.predefined_coords.keys()}
+    for x in list(medios_asignados["Id_Medio"]):
         id_conjunto = df2["Asignacion_Cuadrante_T2"][x]
-        marker = f.viz_medios(df2, x, predefined_coords, polygon_counter, id_conjunto)
+        marker = f.viz_medios(conjuntos=conjuntos, 
+                              df = df2, 
+                              id_medio = x, 
+                              predefined_coords= f.predefined_coords, 
+                              polygon_counter= polygon_counter, 
+                              id_conjunto= id_conjunto, 
+                              turno = 2)
         if marker:
             marker.add_to(mapa)
 
@@ -271,15 +283,21 @@ elif turno ==2:
 
 elif turno ==3:
     # Agregar diferencia
-    for x in list(capa["CUADRANTE_"].unique()):
+    for x in list(df1["Cuadrante"].unique()):
         f.label_diferencia(x,df1,capa).add_to(mapa)
 
     # Agregar marcadores de medios asignados
     medios_asignados = df2[df2["Asignacion_Cuadrante_T3"] != 0] # Filtrar por medios que han sido asignados
-    polygon_counter = {key: 0 for key in predefined_coords.keys()}
-    for x in list(medios_asignados["Id"]):
+    polygon_counter = {key: 0 for key in f.predefined_coords.keys()}
+    for x in list(medios_asignados["Id_Medio"]):
         id_conjunto = df2["Asignacion_Cuadrante_T3"][x]
-        marker = f.viz_medios(df2, x, predefined_coords, polygon_counter, id_conjunto)
+        marker = f.viz_medios(conjuntos=conjuntos, 
+                              df = df2, 
+                              id_medio = x, 
+                              predefined_coords= f.predefined_coords, 
+                              polygon_counter= polygon_counter, 
+                              id_conjunto= id_conjunto, 
+                              turno = 3)
         if marker:
             marker.add_to(mapa)
 
@@ -291,15 +309,21 @@ elif turno ==3:
 
 else:
     # Agregar diferencia
-    for x in list(capa["CUADRANTE_"].unique()):
+    for x in list(df1["Cuadrante"].unique()):
         f.label_diferencia(x,df1,capa).add_to(mapa)
 
     # Agregar marcadores de medios asignados
     medios_asignados = df2[df2["Asignacion_Cuadrante_T4"] != 0] # Filtrar por medios que han sido asignados
-    polygon_counter = {key: 0 for key in predefined_coords.keys()}
-    for x in list(medios_asignados["Id"]):
-        id_conjunto = df2["Asignacion_Cuadrante_T4"][x]
-        marker = f.viz_medios(df2, x, predefined_coords, polygon_counter, id_conjunto)
+    polygon_counter = {key: 0 for key in f.predefined_coords.keys()}
+    for x in list(medios_asignados["Id_Medio"]):
+        id_conjunto = df2["Asignacion_Cuadrante_T1"][x]
+        marker = f.viz_medios(conjuntos=conjuntos, 
+                              df = df2, 
+                              id_medio = x, 
+                              predefined_coords= f.predefined_coords, 
+                              polygon_counter= polygon_counter, 
+                              id_conjunto= id_conjunto, 
+                              turno = 4)
         if marker:
             marker.add_to(mapa)
 
