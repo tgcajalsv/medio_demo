@@ -328,3 +328,5 @@ else:
 
         # Mostrar mapa
         components.html(map_html, width=1200, height=750)
+
+        st.dataframe(df3)
